@@ -50,7 +50,7 @@ const dateBalance = document.querySelector('.date');
 const valueBalance = document.querySelector('.balance__value');
 
 //APP-Movements selectors
-const movements = document.querySelector('.movements');
+const containerMovements = document.querySelector('.movements');
 const movementsRow = document.querySelectorAll('.movements__row');
 const movementsType = document.querySelectorAll('.movements__type');
 const movementsTypeDeposit = document.querySelector(
@@ -100,3 +100,55 @@ const formInputPin = document.querySelector('.form__input--pin');
 const formCloseBtn = document.querySelector('.form__btn--close');
 const logoutTimer = document.querySelector('.logout-timer');
 const timer = document.querySelector('.timer');
+
+//Display deposit/withdrawal movements
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = ''; // Deleting the previous data when calling the new one
+  movements.forEach((mov, i) => {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const html = `<div class="movements__row">
+          <div class="movements__type movements__type--${type}">${
+      i + 1
+    } ${type}</div>
+          <div class="movements__value">${mov}€</div>
+        </div>
+        `;
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+
+  //Calculating & displaying the Current balance
+  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+  valueBalance.textContent = `${balance}€`;
+
+  //Calculating & displaying Summary
+  const incomes = movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  summaryValueIn.textContent = `${incomes}€`;
+
+  const out = movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  summaryValueOut.textContent = `${Math.abs(out)}€`;
+
+  const interest = movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * 1.2) / 100)
+    .filter(int => int >= 1)
+    .reduce((acc, int) => acc + int, 0);
+  summaryValueInterest.textContent = `${interest}€`;
+};
+displayMovements(account1.movements);
+
+//Creating userName function
+const createUserName = function (accs) {
+  accs.forEach(
+    acc =>
+      (acc.userName = acc.owner
+        .toLowerCase()
+        .split(' ')
+        .map(name => name.at(0))
+        .join(''))
+  );
+};
+createUserName(accounts);
