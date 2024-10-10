@@ -112,6 +112,22 @@ function displayDate(date, dateSelector) {
   dateSelector.textContent = `${day}/${month}/${year}, ${hour}:${minute}`;
 }
 
+//Internationalization API for Current Balance Date and others
+function internationalizationDate(date, dateSelector) {
+  const options = {
+    hour: 'numeric',
+    minute: 'numeric',
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+    weekday: 'long',
+  };
+  const locale = navigator.language;
+  dateSelector.textContent = new Intl.DateTimeFormat(locale, options).format(
+    date
+  );
+}
+
 //Display deposit/withdrawal movements
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ''; // Deleting the previous data when calling the new one
@@ -187,7 +203,7 @@ loginBtn.addEventListener('click', e => {
     app.style.opacity = 100;
     //Display Current Balnce Date
     const date = new Date();
-    displayDate(date, dateBalance);
+    internationalizationDate(date, dateBalance);
     //Clear input fields
     loginInputUser.value = loginInputPin.value = '';
     loginInputPin.blur();
