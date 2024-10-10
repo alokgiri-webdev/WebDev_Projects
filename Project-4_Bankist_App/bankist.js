@@ -101,6 +101,17 @@ const formCloseBtn = document.querySelector('.form__btn--close');
 const logoutTimer = document.querySelector('.logout-timer');
 const timer = document.querySelector('.timer');
 
+//Implementing Current Balance Date
+//const date = new Date();
+function displayDate(date, dateSelector) {
+  const day = `${date.getDate()}`.padStart(2, 0);
+  const month = `${date.getMonth() + 1}`.padStart(2, 0);
+  const year = date.getFullYear();
+  const hour = `${date.getHours()}`.padStart(2, 0);
+  const minute = `${date.getMinutes()}`.padStart(2, 0);
+  dateSelector.textContent = `${day}/${month}/${year}, ${hour}:${minute}`;
+}
+
 //Display deposit/withdrawal movements
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ''; // Deleting the previous data when calling the new one
@@ -174,6 +185,9 @@ loginBtn.addEventListener('click', e => {
     //Display UI and Welcome Message
     welcome.textContent = `Welcome back ${currentAccount.owner.split(' ')[0]}`;
     app.style.opacity = 100;
+    //Display Current Balnce Date
+    const date = new Date();
+    displayDate(date, dateBalance);
     //Clear input fields
     loginInputUser.value = loginInputPin.value = '';
     loginInputPin.blur();
@@ -243,3 +257,8 @@ formCloseBtn.addEventListener('click', e => {
     app.style.opacity = 0;
   }
 });
+
+//Fake UI
+currentAccount = account1;
+displayMovements(currentAccount);
+app.style.opacity = 100;
