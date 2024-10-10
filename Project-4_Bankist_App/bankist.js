@@ -102,9 +102,14 @@ const logoutTimer = document.querySelector('.logout-timer');
 const timer = document.querySelector('.timer');
 
 //Display deposit/withdrawal movements
-const displayMovements = function (movements) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ''; // Deleting the previous data when calling the new one
-  movements.forEach((mov, i) => {
+  //Implementing sorting of movements
+  const movs = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
+
+  movs.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `<div class="movements__row">
           <div class="movements__type movements__type--${type}">${
@@ -117,28 +122,35 @@ const displayMovements = function (movements) {
   });
 
   //Calculating & displaying the Current balance
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  valueBalance.textContent = `${balance}€`;
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  valueBalance.textContent = `${acc.balance}€`;
 
   //Calculating & displaying Summary
-  const incomes = movements
+  const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
   summaryValueIn.textContent = `${incomes}€`;
 
-  const out = movements
+  const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
   summaryValueOut.textContent = `${Math.abs(out)}€`;
 
-  const interest = movements
+  const interest = acc.movements
     .filter(mov => mov > 0)
-    .map(deposit => (deposit * 1.2) / 100)
+    .map(deposit => (deposit * acc.interestRate) / 100)
     .filter(int => int >= 1)
     .reduce((acc, int) => acc + int, 0);
   summaryValueInterest.textContent = `${interest}€`;
 };
-displayMovements(account1.movements);
+
+//Implementing sort btn
+let sorted = false;
+sortBtn.addEventListener('click', e => {
+  e.preventDefault();
+  displayMovements(currentAccount, !sorted);
+  sorted = !sorted;
+});
 
 //Creating userName function
 const createUserName = function (accs) {
@@ -152,3 +164,82 @@ const createUserName = function (accs) {
   );
 };
 createUserName(accounts);
+
+// Setting up login with right credentials
+let currentAccount;
+loginBtn.addEventListener('click', e => {
+  e.preventDefault();
+  currentAccount = accounts.find(acc => acc.userName === loginInputUser.value);
+  if (currentAccount?.pin === +loginInputPin.value) {
+    //Display UI and Welcome Message
+    welcome.textContent = `Welcome back ${currentAccount.owner.split(' ')[0]}`;
+    app.style.opacity = 100;
+    //Clear input fields
+    loginInputUser.value = loginInputPin.value = '';
+    loginInputPin.blur();
+    //Display Movements, balance & summary
+    displayMovements(currentAccount);
+  }
+});
+
+//Implementing Transfers
+formTransferBtn.addEventListener('click', e => {
+  e.preventDefault();
+  const amount = +formInputAmount.value;
+  const receiverAcc = accounts.find(acc => acc.userName === formInputTo.value);
+
+  //checking conditions before transfer
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc.userName !== currentAccount.userName
+  ) {
+    //Doing the transfer
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+
+    //Updating the UI
+    displayMovements(currentAccount);
+
+    //Clearing the input fields
+    formInputTo.value = formInputAmount.value = '';
+    formInputAmount.blur();
+  }
+});
+
+//Requesting Loan
+formLoanBtn.addEventListener('click', e => {
+  e.preventDefault();
+  const amount = +formInputLoan.value;
+
+  //Checking the condition for requested loan
+  if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
+    currentAccount.movements.push(amount);
+  }
+
+  //Clearing the input fields
+  formInputLoan.value = '';
+  formInputLoan.blur();
+
+  //Upadte the UI
+  displayMovements(currentAccount);
+});
+
+//Closing an Existing account
+formCloseBtn.addEventListener('click', e => {
+  e.preventDefault();
+  if (
+    currentAccount.userName === formInputUser.value &&
+    currentAccount.pin === +formInputPin.value
+  ) {
+    const index = accounts.findIndex(
+      acc => acc.userName === currentAccount.userName
+    );
+    //Deleting the currentAccount
+    accounts.splice(index, 1);
+
+    //Hiding the current UI
+    app.style.opacity = 0;
+  }
+});
