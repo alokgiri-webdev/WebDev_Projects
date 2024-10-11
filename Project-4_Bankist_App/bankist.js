@@ -128,6 +128,17 @@ function internationalizationDate(date, dateSelector) {
   );
 }
 
+// Internationalization of Numbers
+function internationalizationNumbers(mov) {
+  const locale = 'en-IN';
+  const options = {
+    style: 'currency',
+    currency: 'INR',
+  };
+  const formattedMov = new Intl.NumberFormat(locale, options).format(mov);
+  return formattedMov;
+}
+
 //Display deposit/withdrawal movements
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ''; // Deleting the previous data when calling the new one
@@ -138,11 +149,14 @@ const displayMovements = function (acc, sort = false) {
 
   movs.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+
     const html = `<div class="movements__row">
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-          <div class="movements__value">${mov}€</div>
+          <div class="movements__value">${internationalizationNumbers(
+            mov
+          )}</div>
         </div>
         `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -150,25 +164,25 @@ const displayMovements = function (acc, sort = false) {
 
   //Calculating & displaying the Current balance
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
-  valueBalance.textContent = `${acc.balance}€`;
+  valueBalance.textContent = `${internationalizationNumbers(acc.balance)}`;
 
   //Calculating & displaying Summary
   const incomes = acc.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  summaryValueIn.textContent = `${incomes}€`;
+  summaryValueIn.textContent = `${internationalizationNumbers(incomes)}`;
 
   const out = acc.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  summaryValueOut.textContent = `${Math.abs(out)}€`;
+  summaryValueOut.textContent = `${internationalizationNumbers(Math.abs(out))}`;
 
   const interest = acc.movements
     .filter(mov => mov > 0)
     .map(deposit => (deposit * acc.interestRate) / 100)
     .filter(int => int >= 1)
     .reduce((acc, int) => acc + int, 0);
-  summaryValueInterest.textContent = `${interest}€`;
+  summaryValueInterest.textContent = `${internationalizationNumbers(interest)}`;
 };
 
 //Implementing sort btn
