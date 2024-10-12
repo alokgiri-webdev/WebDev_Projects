@@ -206,8 +206,38 @@ const createUserName = function (accs) {
 };
 createUserName(accounts);
 
+//Run Logout Timer
+const startLogoutTimer = () => {
+  // Set time to 5 mins
+  let time = 10;
+
+  const tick = () => {
+    const min = String(Math.floor(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    // In each call, print the remaining time to UI
+    timer.textContent = `${min}:${sec}`;
+
+    // When 0 seconds, stop timer and logout user
+    if (time === 0) {
+      clearInterval(timerOfLogout);
+      welcome.textContent = `Log in to get started`;
+      app.style.opacity = 0;
+    }
+
+    //Decrease 1s
+    time--;
+  };
+
+  // Call the timer every 1 second
+  tick();
+  const timerOfLogout = setInterval(tick, 1000);
+
+  return timerOfLogout;
+};
+
 // Setting up login with right credentials
-let currentAccount;
+let currentAccount, timerOfLogout;
+
 loginBtn.addEventListener('click', e => {
   e.preventDefault();
   currentAccount = accounts.find(acc => acc.userName === loginInputUser.value);
@@ -218,10 +248,16 @@ loginBtn.addEventListener('click', e => {
     //Display Current Balnce Date
     const date = new Date();
     internationalizationDate(date, dateBalance);
+
     //Clear input fields
     loginInputUser.value = loginInputPin.value = '';
     loginInputPin.blur();
-    //Display Movements, balance & summary
+
+    //Calling LogoutTimer
+    if (timerOfLogout) clearInterval(timerOfLogout);
+    timerOfLogout = startLogoutTimer();
+
+    //Display UI
     displayMovements(currentAccount);
   }
 });
@@ -246,6 +282,10 @@ formTransferBtn.addEventListener('click', e => {
     //Updating the UI
     displayMovements(currentAccount);
 
+    // Reset Timer
+    clearInterval(timerOfLogout);
+    timerOfLogout = startLogoutTimer();
+
     //Clearing the input fields
     formInputTo.value = formInputAmount.value = '';
     formInputAmount.blur();
@@ -255,19 +295,25 @@ formTransferBtn.addEventListener('click', e => {
 //Requesting Loan
 formLoanBtn.addEventListener('click', e => {
   e.preventDefault();
-  const amount = +formInputLoan.value;
+  const amount = Math.floor(+formInputLoan.value);
 
   //Checking the condition for requested loan
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
-    currentAccount.movements.push(amount);
+    setTimeout(() => {
+      //Add movement
+      currentAccount.movements.push(amount);
+      //Upadte the UI
+      displayMovements(currentAccount);
+    }, 2500);
+
+    // Reset Timer
+    clearInterval(timerOfLogout);
+    timerOfLogout = startLogoutTimer();
   }
 
   //Clearing the input fields
   formInputLoan.value = '';
   formInputLoan.blur();
-
-  //Upadte the UI
-  displayMovements(currentAccount);
 });
 
 //Closing an Existing account
@@ -288,7 +334,9 @@ formCloseBtn.addEventListener('click', e => {
   }
 });
 
-//Fake UI
-currentAccount = account1;
-displayMovements(currentAccount);
-app.style.opacity = 100;
+// //Fake UI
+// currentAccount = account1;
+// displayMovements(currentAccount);
+// app.style.opacity = 100;
+
+//Implementing the timer
