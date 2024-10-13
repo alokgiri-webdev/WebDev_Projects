@@ -110,7 +110,6 @@ window.addEventListener('scroll', () => {
 */
 
 //Implementing Sticky navigation (Using Observer API)
-
 const stickyNav = function (entries) {
   const [entry] = entries;
   if (!entry.isVisible) {
@@ -122,6 +121,27 @@ const stickyNav = function (entries) {
 
 const navObserver = new IntersectionObserver(stickyNav, {
   root: null,
-  threshold: 0,
+  threshold: 0, //Threshold represents at what percentage, the callBack function will get triggered.
 });
 navObserver.observe(nav);
+
+//Implementing Revealing Sections on Scroll using Observer API
+const allSections = document.querySelectorAll('.section');
+
+const revealSection = function (entries, observer) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+};
+
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null,
+  threshold: 0.15,
+});
+allSections.forEach(section => {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+//
