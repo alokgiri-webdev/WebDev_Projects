@@ -144,4 +144,20 @@ allSections.forEach(section => {
   section.classList.add('section--hidden');
 });
 
-//
+//Implement lazy loading of images using Oberver API
+const imgTargets = document.querySelectorAll('img[data-src]');
+const loadImg = function (entries, observer) {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+  entry.target.src = entry.target.dataset.src; // This loading runs in background. And only after loading is done, we want to remove the lazy img class.
+  //entry.target.classList.remove('lazy-img'); (Don't Do this way)
+  entry.target.addEventListener('load', () => {
+    entry.target.classList.remove('lazy-img');
+  });
+  observer.unobserve(entry.target);
+};
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0.1,
+});
+imgTargets.forEach(img => imgObserver.observe(img));
