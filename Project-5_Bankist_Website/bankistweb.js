@@ -54,4 +54,55 @@ nav.addEventListener('click', e => {
   }
 });
 
-//Building Tabbed Component
+//Building Tabbed Component (Using Event Delegation)
+tabsContainer.addEventListener('click', e => {
+  e.preventDefault();
+  //Matching Strategy
+  const clicked = e.target.closest('.operations__tab');
+  if (!clicked) return;
+  //Remove Active classes
+  tabs.forEach(tab => tab.classList.remove('operations__tab--active'));
+  tabsContent.forEach(content =>
+    content.classList.remove('operations__content--active')
+  );
+  //Activate Tab
+  clicked.classList.add('operations__tab--active');
+  //Activate Content Area
+  document
+    .querySelector(`.operations__content--${clicked.dataset.tab}`)
+    .classList.add('operations__content--active');
+});
+
+//Menu Fade Animation Function
+const handleHover = function (e, opacity) {
+  if (e.target.classList.contains('nav__link')) {
+    const link = e.target;
+    const siblings = link.closest('.nav').querySelectorAll('.nav__link');
+    const logo = link.closest('.nav').querySelector('img');
+
+    siblings.forEach(l => {
+      if (l !== link) {
+        l.style.opacity = opacity;
+      }
+      logo.style.opacity = opacity;
+    });
+  }
+};
+
+nav.addEventListener('mouseover', e => {
+  handleHover(e, 0.5);
+});
+
+nav.addEventListener('mouseout', e => {
+  handleHover(e, 1);
+});
+
+//Implementing Sticky navigation
+const initialCoords = nav.getBoundingClientRect();
+window.addEventListener('scroll', () => {
+  if (window.scrollY > initialCoords.top) {
+    nav.classList.add('sticky');
+  } else {
+    nav.classList.remove('sticky');
+  }
+});
