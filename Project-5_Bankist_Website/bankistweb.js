@@ -98,6 +98,7 @@ nav.addEventListener('mouseout', e => {
 });
 
 //Implementing Sticky navigation
+/*
 const initialCoords = nav.getBoundingClientRect();
 window.addEventListener('scroll', () => {
   if (window.scrollY > initialCoords.top) {
@@ -106,3 +107,21 @@ window.addEventListener('scroll', () => {
     nav.classList.remove('sticky');
   }
 });
+*/
+
+//Implementing Sticky navigation (Using Observer API)
+
+const stickyNav = function (entries) {
+  const [entry] = entries;
+  if (!entry.isVisible) {
+    nav.classList.add('sticky');
+  } else {
+    nav.classList.remove('sticky');
+  }
+};
+
+const navObserver = new IntersectionObserver(stickyNav, {
+  root: null,
+  threshold: 0,
+});
+navObserver.observe(nav);
