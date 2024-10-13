@@ -40,3 +40,18 @@ document.addEventListener('keydown', function (e) {
 btnScrollTo.addEventListener('click', () => {
   section1.scrollIntoView({ behavior: 'smooth' });
 });
+
+//Page Navigation (Using Event Delegation)
+//1. Add event listener to common 'Parent element'
+//2. Determine what element originated the event
+
+nav.addEventListener('click', e => {
+  e.preventDefault();
+  //Matching Strategy
+  if (e.target.classList.contains('nav__link')) {
+    const id = e.target.getAttribute('href');
+    document.querySelector(id).scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+//Building Tabbed Component
