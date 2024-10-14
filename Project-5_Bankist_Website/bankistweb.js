@@ -10,7 +10,11 @@ const nav = document.querySelector('.nav');
 const tabs = document.querySelectorAll('.operations__tab');
 const tabsContainer = document.querySelector('.operations__tab-container');
 const tabsContent = document.querySelectorAll('.operations__content');
-
+const slider = document.querySelector('.slider');
+const slides = document.querySelectorAll('.slide');
+const sliderBtnLeft = document.querySelector('.slider__btn--left');
+const sliderBtnRight = document.querySelector('.slider__btn--right');
+const dotsContainer = document.querySelector('.dots');
 ///////////////////////////////////////
 // Modal window
 
@@ -161,3 +165,80 @@ const imgObserver = new IntersectionObserver(loadImg, {
   threshold: 0.1,
 });
 imgTargets.forEach(img => imgObserver.observe(img));
+
+//Implement Slider component (Arrow)
+let curSlide = 0;
+const maxSlide = slides.length;
+const goToSlide = function (slide) {
+  slides.forEach(
+    (s, i) => (s.style.transform = `translateX(${100 * (i - slide)}%)`)
+  );
+};
+
+//Implement Slider Component (dots)
+const createDots = function () {
+  slides.forEach((_, i) => {
+    const html = `<button class="dots__dot" data-slide="${i}"></button>`;
+    dotsContainer.insertAdjacentHTML('beforeend', html);
+  });
+};
+
+const activateDot = function (slide) {
+  document
+    .querySelectorAll('.dots__dot')
+    .forEach(dot => dot.classList.remove('dots__dot--active'));
+
+  document
+    .querySelector(`.dots__dot[data-slide="${slide}"]`)
+    .classList.add('dots__dot--active');
+};
+
+const nextSlide = function () {
+  if (curSlide === maxSlide - 1) {
+    curSlide = 0;
+  } else {
+    curSlide++;
+  }
+  goToSlide(curSlide);
+  activateDot(curSlide);
+};
+
+const prevSlide = function () {
+  if (curSlide === 0) {
+    curSlide = maxSlide - 1;
+  } else {
+    curSlide--;
+  }
+  goToSlide(curSlide);
+  activateDot(curSlide);
+};
+
+const init = function () {
+  goToSlide(0);
+  createDots();
+  activateDot(0);
+};
+init();
+
+//Implement slider movement using virtual Arrow buttons
+sliderBtnRight.addEventListener('click', () => {
+  nextSlide();
+});
+sliderBtnLeft.addEventListener('click', () => {
+  prevSlide();
+});
+
+//Implement slider movement using Arrow keys
+document.addEventListener('keydown', e => {
+  e.key === 'ArrowRight' && nextSlide();
+  e.key === 'ArrowLeft' && prevSlide();
+});
+
+//Using Event delegation for slider movement by dots
+dotsContainer.addEventListener('click', e => {
+  if (e.target.classList.contains('dots__dot')) {
+    const { slide } = e.target.dataset;
+    goToSlide(slide);
+    activateDot(slide);
+  }
+});
